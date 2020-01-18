@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>test</title>
+</head>
+<body>
+    <div class="test">
+    <!-- https://github.com/thavath/restful-services.git -->
+    <!-- echo "# restful-services" >> README.md
+        git init
+        git config --global user.email "you@example.com"
+        git config --global user.name "Your Name"
+        git add README.md
+        git commit -m "first commit"
+        git remote add origin https://github.com/thavath/restful-services.git
+        git push -u origin master 
+    -->
+    <!-- 
+        git remote add origin https://github.com/thavath/restful-services.git
+        git push -u origin master 
+    -->
+    </div>
+    <script src="client/assets/bootstrap/jquery.min.js"></script>
+    <script>
+         $(document).ready(function(){ 
+            $.get("http://php.thavath.com:8080/backend/api/users/get.php", function(result, status){
+                console.log(status);
+                if(status === "success"){
+                    $.each(result, function(index, row){
+                        console.log(row);
+                        $("div.test").append(row.username + " ");
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
