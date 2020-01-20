@@ -4,8 +4,11 @@ require_once "../../models/user.php";
 if($conn) { 
     //header("Access-Control-Allow-Origin: http://php.thavath.com:8080");
     header("Access-Control-Allow-Origin: http://php.thavath.com:8080");
-    header("Access-Control-Allow-Methods: POST");
     header("Content-Type: application/json; charset=UTF-8");
+    header("Access-Control-Allow-Methods: POST");
+    header("Access-Control-Max-Age: 3600");
+    header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+ 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {   
         if(!empty($_POST["username"]) and !empty($_POST["password"]) and !empty($_POST['email'])){ 
             $username = isset($_POST['username']) ? $_POST['username'] : null;
