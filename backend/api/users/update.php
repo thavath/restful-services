@@ -45,6 +45,8 @@ if ($access_token) {
         // decode jwt
         $decoded = JWT::decode($access_token, $key, array('HS256'));
 
+
+        // files for jwt will be here 
         // set user property values here
         // set user property values
         $user->id = $decoded->data->id;
@@ -53,50 +55,58 @@ if ($access_token) {
         $user->password = $data->password;
         $user->phone_number = $data->phone_number;
         $user->country_code = $data->country_code;
-        // update user will be here
-        // update the user record
-        if ($user->update()) {
-            // regenerate jwt will be here
-            // we need to re-generate jwt because user details might be different
-            $token = array(
-                "iss" => $iss,
-                "aud" => $aud,
-                "iat" => $iat,
-                "nbf" => $nbf,
-                "data" => array(
-                    "id" => $user->id,
-                    "username" => $user->username, 
-                    "email" => $user->email
-                )
-            );
-            $jwt = JWT::encode($token, $key);
 
-            // set response code
-            http_response_code(200);
+        // check if email exists and if password is correct
+        if ($user->verifyPassword($user->id, $data->confirm_password)) {
+            // update user will be here 
+            if ($user->update()) {
+                // regenerate jwt will be here
+                // we need to re-generate jwt because user details might be different
+                $token = array(
+                    "iss" => $iss,
+                    "aud" => $aud,
+                    "iat" => $iat,
+                    "nbf" => $nbf,
+                    "data" => array(
+                        "id" => $user->id,
+                        "username" => $user->username,
+                        "email" => $user->email,
+                        "country_code" => $user->country_code,
+                        "phone_number" => $user->phone_number
+                    )
+                );
+                $jwt = JWT::encode($token, $key);
 
-            // response in json format
-            echo json_encode(
-                array(
-                    "message" => "User was updated.",
-                    "access_token" => $access_token
-                )
-            );
-        }
+                // set response code
+                http_response_code(200);
 
-        // message if unable to update user
-        else {
+                // response in json format
+                echo json_encode(
+                    array(
+                        "message" => "User was updated.",
+                        "access_token" => $token
+                    )
+                );
+            }
+            // message if unable to update user
+            else {
+                // set response code
+                http_response_code(401);
+
+                // show error message
+                echo json_encode(array("message" => "Unable to update user."));
+            }
+        } else {
             // set response code
             http_response_code(401);
 
             // show error message
-            echo json_encode(array("message" => "Unable to update user."));
+            echo json_encode(array("message" => "Your password is incorrect."));
         }
     }
-
     // catch failed decoding will be here
     // if decode fails, it means jwt is invalid
     catch (Exception $e) {
-
         // set response code
         http_response_code(401);
 
@@ -107,14 +117,14 @@ if ($access_token) {
         ));
     }
 }
- 
+
 // error message if jwt is empty will be here
 // show error message if jwt is empty
-else{
- 
+else {
+
     // set response code
     http_response_code(401);
- 
+
     // tell the user access denied
     echo json_encode(array("message" => "Access denied."));
 }

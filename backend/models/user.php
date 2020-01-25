@@ -57,18 +57,47 @@ class User
         }
         return false;
     }
+    function verifyPassword($id, $comfirm_password){ 
+         $query = "SELECT *
+         FROM " . $this->table_name . "
+         WHERE id = ?
+         LIMIT 0,1"; 
+        // prepare the query
+        $stmt = $this->conn->prepare($query);
 
+        // sanitize
+        // $password = htmlspecialchars(strip_tags($password));
+
+        // bind given email value
+        $stmt->bindParam(1, $id);
+
+        // execute the query
+        $stmt->execute();
+
+        // get number of rows
+        $num = $stmt->rowCount();
+
+        // if email exists, assign values to object properties for easy access and use for php sessions
+        if ($num > 0) { 
+            // get record details / values
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            // return true because password is match in the database
+            $comfirm_password = htmlspecialchars(strip_tags($comfirm_password));
+            $result = password_verify($comfirm_password, $row['password']);
+            return $result;
+        }
+        return false;
+    }
     // emailExists() method will be here
     // check if given email exist in the database
     function emailExists()
     {
 
         // query to check if email exists
-        $query = "SELECT id, username, password
+        $query = "SELECT id, username, password, phone_number, country_code, email
                 FROM " . $this->table_name . "
                 WHERE email = ?
-                LIMIT 0,1";
-
+                LIMIT 0,1"; 
         // prepare the query
         $stmt = $this->conn->prepare($query);
 
@@ -94,6 +123,8 @@ class User
             $this->id = $row['id'];
             $this->username = $row['username'];
             $this->password = $row['password'];
+            $this->phone_number = $row['phone_number'];
+            $this->country_code = $row['country_code'];
 
             // return true because email exists in the database
             return true;
@@ -120,10 +151,8 @@ class User
                 phone_number = :phone_number,
                 country_code = :country_code
             WHERE id = :id";
-
         // prepare the query
-        $stmt = $this->conn->prepare($query);
-
+        $stmt = $this->conn->prepare($query); 
         // sanitize
         $this->username = htmlspecialchars(strip_tags($this->username));
         $this->phone_number = htmlspecialchars(strip_tags($this->phone_number));
